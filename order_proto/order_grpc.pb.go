@@ -22,6 +22,7 @@ const (
 	Order_CartItemList_FullMethodName   = "/order.Order/CartItemList"
 	Order_CreateCartItem_FullMethodName = "/order.Order/CreateCartItem"
 	Order_UpdateCartItem_FullMethodName = "/order.Order/UpdateCartItem"
+	Order_DeleteCartItem_FullMethodName = "/order.Order/DeleteCartItem"
 	Order_Create_FullMethodName         = "/order.Order/Create"
 	Order_OrderList_FullMethodName      = "/order.Order/OrderList"
 	Order_OrderDetail_FullMethodName    = "/order.Order/OrderDetail"
@@ -35,6 +36,7 @@ type OrderClient interface {
 	CartItemList(ctx context.Context, in *UserInfo, opts ...grpc.CallOption) (*CartItemListResponse, error)
 	CreateCartItem(ctx context.Context, in *CartItemRequest, opts ...grpc.CallOption) (*ShopCartInfoResponse, error)
 	UpdateCartItem(ctx context.Context, in *CartItemRequest, opts ...grpc.CallOption) (*Empty, error)
+	DeleteCartItem(ctx context.Context, in *CartItemRequest, opts ...grpc.CallOption) (*Empty, error)
 	// 订单
 	Create(ctx context.Context, in *OrderRequest, opts ...grpc.CallOption) (*OrderInfoResponse, error)
 	OrderList(ctx context.Context, in *OrderFilterRequest, opts ...grpc.CallOption) (*OrderListResponse, error)
@@ -71,6 +73,15 @@ func (c *orderClient) CreateCartItem(ctx context.Context, in *CartItemRequest, o
 func (c *orderClient) UpdateCartItem(ctx context.Context, in *CartItemRequest, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
 	err := c.cc.Invoke(ctx, Order_UpdateCartItem_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *orderClient) DeleteCartItem(ctx context.Context, in *CartItemRequest, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, Order_DeleteCartItem_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -120,6 +131,7 @@ type OrderServer interface {
 	CartItemList(context.Context, *UserInfo) (*CartItemListResponse, error)
 	CreateCartItem(context.Context, *CartItemRequest) (*ShopCartInfoResponse, error)
 	UpdateCartItem(context.Context, *CartItemRequest) (*Empty, error)
+	DeleteCartItem(context.Context, *CartItemRequest) (*Empty, error)
 	// 订单
 	Create(context.Context, *OrderRequest) (*OrderInfoResponse, error)
 	OrderList(context.Context, *OrderFilterRequest) (*OrderListResponse, error)
@@ -140,6 +152,9 @@ func (UnimplementedOrderServer) CreateCartItem(context.Context, *CartItemRequest
 }
 func (UnimplementedOrderServer) UpdateCartItem(context.Context, *CartItemRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateCartItem not implemented")
+}
+func (UnimplementedOrderServer) DeleteCartItem(context.Context, *CartItemRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteCartItem not implemented")
 }
 func (UnimplementedOrderServer) Create(context.Context, *OrderRequest) (*OrderInfoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
@@ -216,6 +231,24 @@ func _Order_UpdateCartItem_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(OrderServer).UpdateCartItem(ctx, req.(*CartItemRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Order_DeleteCartItem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CartItemRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrderServer).DeleteCartItem(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Order_DeleteCartItem_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrderServer).DeleteCartItem(ctx, req.(*CartItemRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -310,6 +343,10 @@ var Order_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateCartItem",
 			Handler:    _Order_UpdateCartItem_Handler,
+		},
+		{
+			MethodName: "DeleteCartItem",
+			Handler:    _Order_DeleteCartItem_Handler,
 		},
 		{
 			MethodName: "Create",
